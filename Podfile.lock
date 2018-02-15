@@ -1,0 +1,21 @@
+PODS:
+  - ObjectiveSugar (1.1.1)
+
+DEPENDENCIES:
+  - ObjectiveSugar (from `https://github.com/supermarin/ObjectiveSugar.git`)
+
+EXTERNAL SOURCES:
+  ObjectiveSugar:
+    :git: https://github.com/supermarin/ObjectiveSugar.git
+
+CHECKOUT OPTIONS:
+  ObjectiveSugar:
+    :commit: 3d1c39adb701938ce2e19f8e5a789c72450f18ed
+    :git: https://github.com/supermarin/ObjectiveSugar.git
+
+SPEC CHECKSUMS:
+  ObjectiveSugar: 0729eb74a757ea48b109a8902178c9b89aa58a9f
+
+PODFILE CHECKSUM: 1b77607af94b4fbd95b7413c5e544cd2c7142b8e
+
+COCOAPODS: 1.3.1

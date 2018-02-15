@@ -1,0 +1,19 @@
+*~
+.DS_Store
+Pods/Pods.xcodeproj/xcuserdata
+
+
+iOSInjectionProject
+.idea
+build
+Coins.xcworkspace/xcuserdata
+Coins.xcodeproj/xcuserdata
+fastlane/report.xml
+Builds/
+Pods/
+
+#Pods
+Pods/
+
+# Carthage
+Carthage/Checkouts/
