@@ -34,35 +34,39 @@
 
 -(NSArray *)outlets {
     return @[
-
-             [NBOutletData dataWithName:@"fieldName" className:@"UILabel"],
-             [NBOutletData dataWithName:@"textField" className:@"UITextField"],
-             [NBOutletData dataWithName:@"helpTextContainer" className:@"UIView"],
-             [NBOutletData dataWithName:@"helpTextLabel" className:@"UILabel"],
-             [NBOutletData dataWithName:@"noticeLabel" className:@"UILabel"],
-             [NBOutletData dataWithName:@"paymentContainer" className:@"UIView"],
-             [NBOutletData dataWithName:@"getAmountTitleLabel" className:@"UILabel"],
-             [NBOutletData dataWithName:@"getAmountLabel" className:@"UILabel"],
-//             [NBOutletData dataWithName:@"feeAmountTitleLabel" className:@"UILabel"],
-//             [NBOutletData dataWithName:@"feeAmountLabel" className:@"UILabel"],
-//             [NBOutletData dataWithName:@"chargeAmountTitleLabel" className:@"UILabel"],
-//             [NBOutletData dataWithName:@"chargeAmountLabel" className:@"UILabel"],
+             [NBOutletData dataWithName:@"shadowContainer" className:@"UIView"],
+             [NBOutletData dataWithName:@"convertingFromLabel" className:@"UILabel"],
              
-//             [NBOutletData dataWithName:@"outletLabel" className:@"UILabel"],
-//             [NBOutletData dataWithName:@"dateLabel" className:@"UILabel"],
-             [NBOutletData dataWithName:@"otherButton" className:@"UIButton"],
-//             [NBOutletData dataWithName:@"firstNameFieldRow" className:@"EditFieldRow"],
-//             [NBOutletData dataWithName:@"middleNameFieldRow" className:@"EditFieldRow"],
-//             [NBOutletData dataWithName:@"lastNameFieldRow" className:@"EditFieldRow"],
+             [NBOutletData dataWithName:@"sourceCurrencyContainer" className:@"UIView"],
+             [NBOutletData dataWithName:@"sourceCurrencyLabel" className:@"UILabel"],
+             [NBOutletData dataWithName:@"sourceCurrencyChangeImageView" className:@"UIImageView"],
+             [NBOutletData dataWithName:@"sourceAmountTextField" className:@"UITextField"],
+             [NBOutletData dataWithName:@"walletBalanceLabel" className:@"UILabel"],
+             
+             [NBOutletData dataWithName:@"convertImageView" className:@"UIImageView"],
+             [NBOutletData dataWithName:@"horizontalLine" className:@"UIView"],
+             
+             [NBOutletData dataWithName:@"convertingToLabel" className:@"UILabel"],
+             
+             [NBOutletData dataWithName:@"targetCurrencyContainer" className:@"UIView"],
+             [NBOutletData dataWithName:@"targetCurrencyLabel" className:@"UILabel"],
+             [NBOutletData dataWithName:@"targetCurrencyChangeImageView" className:@"UIImageView"],
+             [NBOutletData dataWithName:@"targetAmountTextField" className:@"UITextField"],
+             
+             [NBOutletData dataWithName:@"rateTitleLabel" className:@"UILabel"],
+             [NBOutletData dataWithName:@"rateLabel" className:@"UILabel"],
+
+             [NBOutletData dataWithName:@"convertSlider" className:@"COSlider"],
+             [NBOutletData dataWithName:@"messageLabel" className:@"UILabel"],
              ];
 }
 
 -(NSString *)className {
-    return @"RequiredFieldsHeaderVC";
+    return @"COConvertFundsVC";
 }
 
 -(NSString *)categoryName {
-    return @"Payout";
+    return @"ConvertFunds";
 }
 
 -(NSString *)capitalizedString:(NSString *)string {

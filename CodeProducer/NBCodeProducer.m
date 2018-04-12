@@ -57,11 +57,17 @@
     if ([self isViewController]) {
         [mutString appendString:[self produceActionMethods]];
         [mutString appendString:@"\n"];
+        [mutString appendString:[self produceDelegateNotificationMethods]];
+        [mutString appendString:@"\n"];
     }
-//    [mutString appendString:[self produceDelegateNotificationMethods]];
-//    [mutString appendString:@"\n\n"];
     
     [mutString appendString:@"@end\n"];
+
+    if ([self isViewController]) {
+        [mutString appendString:@"\n\n\n"];
+        // produce header file
+        [mutString appendString:[self produceHeaderFile]];
+    }
 
     NSLog(@"Code:\n\n%@", mutString);
 }
@@ -248,7 +254,18 @@
 }
 
 -(NSString *)produceDelegateNotificationMethods {
-    return nil;
+    NSMutableString *mutString = [NSMutableString new];
+    [mutString appendString:@"#pragma mark - Delegate notification methods -\n"];
+    
+    [_outlets each:^(NBOutletData *outlet) {
+        NSString *string = [self delegateNotificationMethodWithOutlet:outlet];
+        if (string.length > 0) {
+            [mutString appendString:string];
+            [mutString appendString:@"\n"];
+        }
+    }];
+    
+    return [mutString copy];
 }
 
 //-(NSString *)ivarNameWithOutlet:(NBOutletData *)outlet {
@@ -291,13 +308,13 @@
 }
 
 -(NSString *)constructorMethodNameWithOutlet:(NBOutletData *)outlet {
-    NSString *capitalizedString = [self capitalizedOutletName:outlet.name];
+    NSString *capitalizedString = [self capitalizedString:outlet.name];
     
     NSString *name = [NSString stringWithFormat:@"new%@", capitalizedString];
     return name;
 }
 
--(NSString *)capitalizedOutletName:(NSString *)outletName {
+-(NSString *)capitalizedString:(NSString *)outletName {
     NSString *firstCapChar = [[outletName substringToIndex:1] capitalizedString];
     NSString *capitalizedString = [outletName stringByReplacingCharactersInRange:NSMakeRange(0,1) withString:firstCapChar];
 
@@ -457,6 +474,14 @@
     }
 }
 
+-(NSString *)delegateNotificationMethodWithOutlet:(NBOutletData *)outlet {
+    if ([self isButtonOutlet:outlet]) {
+        return [self buttonDelegateNotificationMethodWithOutlet:outlet];
+    } else {
+        return nil;
+    }
+}
+
 -(NSString *)actionPlainNameWithOutlet:(NBOutletData *)outlet {
     return [outlet.name stringByReplacingOccurrencesOfString:@"Button" withString:@""];
 }
@@ -473,12 +498,66 @@
     [mutString appendFormat:@"-(IBAction)%@(id)sender {\n", buttonActionName];
     
     if (shouldCallNotifyDelegateMethod) {
-        
+        NSString *delegateNotificationName = [self buttonDelegateNotificationNameWithOutlet:outlet];
+        NSString *format = @"[self %@];\n";
+        NSString *delegateNotificationCall = [NSString stringWithFormat:format, delegateNotificationName];
+        [mutString appendString:delegateNotificationCall];
     }
     
     [mutString appendString:@"}\n"];
     
     return [mutString copy];
+}
+
+-(NSString *)delegateMethodWithOutlet:(NBOutletData *)outlet {
+    if ([self isButtonOutlet:outlet]) {
+        return [self buttonDelegateMethodWithOutlet:outlet];
+    } else {
+        return nil;
+    }
+}
+
+-(NSString *)buttonDelegateNotificationMethodWithOutlet:(NBOutletData *)outlet {
+    
+    NSMutableString *mutString = [NSMutableString new];
+    NSString *buttonDelegateNotificationName = [self buttonDelegateNotificationNameWithOutlet:outlet];
+    
+    [mutString appendFormat:@"-(void)%@ {\n", buttonDelegateNotificationName];
+    NSString *buttonDelegateMethodName = [self buttonDelegateMethodNameWithOutlet:outlet];
+    NSString *line1format = @"if ([self.delegate respondsToSelector:@selector(%@:)]) {\n";
+    NSString *line2format = @"[self.delegate %@:self];\n";
+
+    NSString *line1 = [NSString stringWithFormat:line1format, buttonDelegateMethodName];
+    NSString *line2 = [NSString stringWithFormat:line2format, buttonDelegateMethodName];
+
+    [mutString appendString:line1];
+    [mutString appendString:line2];
+    [mutString appendString:@"}\n"];
+    [mutString appendString:@"}\n"];
+    
+    return [mutString copy];
+}
+
+-(NSString *)buttonDelegateNotificationNameWithOutlet:(NBOutletData *)outlet {
+    // notifyDelegateDidSelectAction
+    NSString *actionName = [self capitalizedString:[self actionPlainNameWithOutlet:outlet]];
+    
+    NSString *format = @"notifyDelegateDidSelect%@";
+    NSString *name = [NSString stringWithFormat:format, actionName];
+    return name;
+}
+
+-(NSString *)buttonDelegateMethodWithOutlet:(NBOutletData *)outlet {
+    NSString *format = @"-(void)%@:(%@ *)vc;";
+    NSString *delegateMethodName =[self buttonDelegateMethodNameWithOutlet:outlet];
+    return [NSString stringWithFormat:format, delegateMethodName, self.className];
+}
+
+-(NSString *)buttonDelegateMethodNameWithOutlet:(NBOutletData *)outlet {
+    NSString *format = @"%@DidSelect%@";
+    NSString *classNameWithLowercasePrefix =[self classNameWithLowercaseOrganizationPrefix];
+    NSString *actionName = [self capitalizedString:[self actionPlainNameWithOutlet:outlet]];
+    return [NSString stringWithFormat:format, classNameWithLowercasePrefix, actionName];
 }
 
 -(BOOL)isView {
@@ -491,7 +570,7 @@
 
 -(NSString *)localizableKeyWithOutlet:(NBOutletData *)outlet {
     NSMutableString *mutString = [NSMutableString new];
-    NSString *className = [self classNameForLocalizableKey];
+    NSString *className = [self classNameForLocalization];
     NSString *outletClassName = [self outletClassNameForLocalizableKeyWithOutlet:outlet];
     NSString *outletName = [self outletNameForLocalizableKeyWithOutlet:outlet];
     NSString *attributeName = [self attributeNameForLocalizableKeyWithOutlet:outlet];
@@ -525,10 +604,10 @@
 -(NSString *)outletNameForLocalizableKeyWithOutlet:(NBOutletData *)outlet {
     if ([outlet.name hasSuffix:@"Label"]) {
         NSString *string = [outlet.name stringByReplacingOccurrencesOfString:@"Label" withString:@""];
-        return [self capitalizedOutletName:string];
+        return [self capitalizedString:string];
     } else if ([outlet.name hasSuffix:@"Button"]) {
         NSString *string = [outlet.name stringByReplacingOccurrencesOfString:@"Button" withString:@""];
-        return [self capitalizedOutletName:string];
+        return [self capitalizedString:string];
     } else {
         return outlet.name;
     }
@@ -544,10 +623,75 @@
     }
 }
 
--(NSString *)classNameForLocalizableKey {
-    NSRange range = NSMakeRange(0, 2);
-    NSString *string = [_className stringByReplacingCharactersInRange:range withString:@""];
-    return string;
+-(NSString *)classNameWithoutOrganizationPrefix {
+    NSString *prefix = [self organizationPrefix];
+    if ([self.className hasPrefix:prefix]) {
+        NSRange range = NSMakeRange(0, prefix.length);
+        return [self.className stringByReplacingCharactersInRange:range withString:@""];
+    } else {
+        return self.className;
+    }
+}
+
+-(NSString *)classNameWithoutOrganizationPrefixAndClassSuffix {
+    NSString *withoutPrefixString = [self classNameWithoutOrganizationPrefix];
+    NSString *suffix = @"VC";
+    if ([withoutPrefixString hasSuffix:suffix]) {
+        NSRange range = NSMakeRange(withoutPrefixString.length-suffix.length, suffix.length);
+        return [withoutPrefixString stringByReplacingCharactersInRange:range withString:@""];
+    } else {
+        return withoutPrefixString;
+    }
+}
+
+-(NSString *)classNameWithLowercaseOrganizationPrefix {
+    NSString *prefix = [self organizationPrefix];
+    if ([self.className hasPrefix:prefix]) {
+        NSString *lowercasePrefix = [prefix lowercaseString];
+        NSRange range = NSMakeRange(0, prefix.length);
+        return [self.className stringByReplacingCharactersInRange:range withString:lowercasePrefix];
+    } else {
+        return self.className;
+    }
+}
+
+-(NSString *)organizationPrefix {
+    return @"CO";
+}
+
+-(NSString *)classNameForLocalization {
+    return [self classNameWithoutOrganizationPrefixAndClassSuffix];
+}
+
+-(BOOL)classHasButtons {
+    return [self.outlets find:^BOOL(NBOutletData *outlet) {
+        return [self isButtonOutlet:outlet];
+    }] != nil;
+}
+
+-(NSString *)produceHeaderFile {
+    NSMutableString *mutString = [NSMutableString new];
+    if ([self classHasButtons]) {
+        [mutString appendFormat:@"@class %@;\n\n", self.className];
+        
+        [mutString appendFormat:@"@protocol %@<NSObject>\n\n", self.protocolName];
+        [self.outlets each:^(NBOutletData *outlet) {
+            NSString *delegateMethod = [self delegateMethodWithOutlet:outlet];
+            if (delegateMethod != nil) {
+                [mutString appendString:delegateMethod];
+                [mutString appendString:@"\n"];
+            }
+        }];
+        [mutString appendString:@"\n"];
+        [mutString appendString:@"@end\n\n"];
+        
+        [mutString appendFormat:@"@property(nonatomic, weak) id<%@> delegate;\n\n", self.protocolName];
+    }
+    return mutString.copy;
+}
+
+-(NSString *)protocolName {
+    return [self.className stringByAppendingString:@"Delegate"];
 }
 
 @end

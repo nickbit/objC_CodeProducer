@@ -10,11 +10,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "CodeProducer/NBCodeProducer.m"
-            timestampString = "534150277.645147"
+            timestampString = "541898800.192205"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "512"
-            endingLineNumber = "512"
+            startingLineNumber = "591"
+            endingLineNumber = "591"
             landmarkName = "-localizableKeyWithOutlet:"
             landmarkType = "7">
          </BreakpointContent>
